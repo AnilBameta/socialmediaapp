@@ -1,5 +1,5 @@
 const express = require('express');
-const {ApolloServer,gql} = require('apollo-server-express');
+const {ApolloServer} = require('apollo-server-express');
 const mongoose = require('mongoose')
 const resolvers = require('./Resolvers');
 const typeDefs = require('./Typedefs');

@@ -3,6 +3,8 @@ const User = require('./models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const secret_key="Anil";
+const checkAuth = require('./util/check-auth');
+
 const resolvers = {
     Query: {
      getPosts() {
@@ -41,7 +43,8 @@ const resolvers = {
            }
         },
 
-        async deleteComment(_,{postId,commentId}) {
+        async deleteComment(_,{postId,commentId},context) {
+            const { username } = checkAuth(context);
             const post = await Post.findById(postId);
            if(post) {
               const commentIndex = post.comments.findIndex(c=> c.id ===commentId);
@@ -61,11 +64,12 @@ const resolvers = {
            }
         },
 
-        async likePost (_,{postId}) {
+        async likePost (_,{postId},context) {
+            const { username } = checkAuth(context);
             const post = await Post.findById(postId);
             if(post){
                 if(post.likes.find(like => like.username === username)){
-                    post.likes = post.likes.filter(like => like.username != username);
+                    post.likes = post.likes.filter(like => like.username !== username);
 
                 }
                 else {
@@ -84,8 +88,9 @@ const resolvers = {
         },
 
 
-        async createPost(_,{body})
+        async createPost(_,{body},context)
         {
+            const user = checkAuth(context);
            const newPost =new Post({
                body,
                user:user.id,
@@ -96,8 +101,9 @@ const resolvers = {
            return post;
         },
         
-        async deletePost(_,{postId}){
+        async deletePost(_,{postId},context){
             try {
+                const user = checkAuth(context);
                 const post =await Post.findById(postId);
                 if(user.username === post.username) {
                     await post.delete();
