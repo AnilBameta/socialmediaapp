@@ -35,7 +35,7 @@ input RegisterInput {
 }
 
 type Query {
- getPosts:[Post]  
+ getPosts:[Post]! 
  getPost(postId:ID!):Post 
 }
 
