@@ -1,32 +1,29 @@
-const express = require('express');
-const {ApolloServer} = require('apollo-server-express');
-const mongoose = require('mongoose')
-const resolvers = require('./Resolvers');
-const typeDefs = require('./Typedefs');
-const cors = require('cors');
+const { ApolloServer, PubSub } = require('apollo-server');
+const mongoose = require('mongoose');
 
+const typeDefs = require('./graphql/typeDefs');
+const resolvers = require('./graphql/resolvers');
+const { MONGODB } = require('./config.js');
 
+const pubsub = new PubSub();
 
-async function startServer(){
-    const app=express()
-    app.use(cors())
-    const apolloServer=new ApolloServer({
-        typeDefs,
-        resolvers,
-        context:({req})=> ({req})
-    });
-    await apolloServer.start()
-   
-    apolloServer.applyMiddleware({app:app});
-   
-    app.use((req,res)=>{
-        res.send("Hello From Apollo Server");
-    })
-   mongoose.connect('mongodb+srv://AnilBameta:AnilgotAtlas@cluster0.9zgnr.mongodb.net/SMData?retryWrites=true&w=majority')
-   .then(()=>console.log("Database Connected"))
-   .catch(err=> console.log(err))
-    app.listen(5000,()=>console.log("Apollo Server Is Running"))
-   }
-   startServer();
+const PORT = process.env.port || 5000;
 
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({ req, pubsub })
+});
 
+mongoose
+  .connect(MONGODB, { useNewUrlParser: true })
+  .then(() => {
+    console.log('MongoDB Connected');
+    return server.listen({ port: PORT });
+  })
+  .then((res) => {
+    console.log(`Server running at ${res.url}`);
+  })
+  .catch(err => {
+    console.error(err)
+  })

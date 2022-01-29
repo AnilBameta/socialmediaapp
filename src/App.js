@@ -1,23 +1,33 @@
 import './App.css';
 import React from 'react';
-import {BrowserRouter as Router,Route,Routes} from 'react-router-dom';
-// import 'semantic-ui-css/semantic.min.css';
-import Navbar from './Component/Navbar';
+import {BrowserRouter as Router,Route} from 'react-router-dom';
+
+import { Container } from 'semantic-ui-react';
+
+import 'semantic-ui-css/semantic.min.css';
+
+import {AuthProvider} from './context/auth';
+import AuthRoute from './util/AuthRoute';
+
+import Navbar from './components/Navbar';
 import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Register from './Pages/Register';
+import SinglePost from './Pages/SinglePost';
 
 function App() {
   return (
-    <Router>
-      <Navbar />
-      <Routes>
-        
-      <Route exact path='/' component={Home} />
-      <Route  path='/login' component={Login} />
-      <Route  path='/register' component={Register} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Container>
+          <Navbar />
+          <Route exact path="/" component={Home} />
+          <AuthRoute exact path="/login" component={Login} />
+          <AuthRoute exact path="/register" component={Register} />
+          <Route exact path="/posts/:postId" component={SinglePost} />
+        </Container>
+      </Router>
+    </AuthProvider>
   );
 }
 
